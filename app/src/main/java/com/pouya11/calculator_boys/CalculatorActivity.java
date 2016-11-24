@@ -25,10 +25,10 @@ public class CalculatorActivity extends AppCompatActivity {
     int iState = CalculatorActivity.STATE_NA;
 
     protected static final int STATE_NA = 0;
-    protected static final int STATE_SUM = 0;
-    protected static final int STATE_SUB = 0;
-    protected static final int STATE_MULTIPLY = 0;
-    protected static final int STATE_DIVIDE = 0;
+    protected static final int STATE_SUM = 1;
+    protected static final int STATE_SUB = 2;
+    protected static final int STATE_MULTIPLY = 3;
+    protected static final int STATE_DIVIDE = 4;
 
 
     @Override
@@ -71,6 +71,20 @@ public class CalculatorActivity extends AppCompatActivity {
         txtNumber.setText("");
     }
 
+    protected double getNumberAndClear(){
+        double result = 0;
+        try {
+            result = Double.parseDouble(txtNumber.getText().toString());
+            CalculatorActivity.this.clear();
+        }catch (Exception e){
+            Toast.makeText(CalculatorActivity.this,
+                    R.string.something_wrong,
+                    Toast.LENGTH_SHORT)
+                    .show();
+        }
+        return result;
+    }
+
     protected class BtnNumbersClicked implements View.OnClickListener {
 
         @Override
@@ -83,7 +97,13 @@ public class CalculatorActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            CalculatorActivity.this.clear();
+            switch (v.getId()) {
+                case R.id.btn_clear_everything:
+                    CalculatorActivity.this.iState = CalculatorActivity.STATE_NA;
+                    CalculatorActivity.this.dMemory = 0;
+                case R.id.btn_clear:
+                    CalculatorActivity.this.clear();
+            }
         }
     }
 
@@ -107,13 +127,42 @@ public class CalculatorActivity extends AppCompatActivity {
                 default:
                     CalculatorActivity.this.iState = CalculatorActivity.STATE_NA;
             }
-            try {
-                CalculatorActivity.this.dMemory = Double.parseDouble(txtNumber.getText().toString());
-            }catch (Exception e){
-                Toast.makeText(CalculatorActivity.this,
-                        R.string.something_wrong,
-                        Toast.LENGTH_SHORT)
-                        .show();
+
+            CalculatorActivity.this.dMemory = CalculatorActivity.this.getNumberAndClear();
+
+
+        }
+
+        protected class BtnResultClicked implements View.OnClickListener{
+
+            @Override
+            public void onClick(View v) {
+                double result = 0;
+                switch (CalculatorActivity.this.iState){
+                    case CalculatorActivity.STATE_SUM:
+                        result = CalculatorActivity.this.getNumberAndClear()
+                                + CalculatorActivity.this.dMemory;
+                        break;
+                    case CalculatorActivity.STATE_SUB:
+                        result = CalculatorActivity.this.dMemory
+                                - CalculatorActivity.this.getNumberAndClear();
+                        break;
+                    case CalculatorActivity.STATE_MULTIPLY:
+                        result = CalculatorActivity.this.getNumberAndClear()
+                                * CalculatorActivity.this.dMemory;
+                        break;
+                    case CalculatorActivity.STATE_DIVIDE:
+                        result = CalculatorActivity.this.dMemory
+                                / CalculatorActivity.this.getNumberAndClear();
+                        break;
+                    default:
+                        Toast.makeText(CalculatorActivity.this,
+                                R.string.something_wrong,
+                                Toast.LENGTH_LONG)
+                                .show();
+                }
+
+                txtNumber.setText(result + "");
             }
         }
     }
